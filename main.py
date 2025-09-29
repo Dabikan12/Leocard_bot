@@ -27,8 +27,7 @@ from telegram.ext import (
     PicklePersistence,
 )
 import constants as C
-import document_scanner_core as docscan
-import google_services
+from services import document_scanner_core as docscan, google_services
 import form_validator
 import fitz  # PyMuPDF
 
