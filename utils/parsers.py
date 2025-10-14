@@ -54,3 +54,62 @@ def is_valid_lpnu_email(email: str) -> bool:
         return False
     email = email.strip().lower()
     return bool(re.match(r"^[A-Za-z0-9._%+-]+@lpnu\.ua$", email))
+
+
+def parse_residency_extract(text: str) -> dict:
+    """Parse residency extract text into fields"""
+    result = {}
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+    # Date of birth
+    dob_match = re.search(r"(Дата народження|date of birth)[^\d]*(\d{2}\.\d{2}\.\d{4})", text, re.IGNORECASE)
+    if dob_match:
+        result["date_of_birth"] = dob_match.group(2)
+
+    # УНЗР (record number)
+    for i, line in enumerate(lines):
+        if "УНЗР" in line and i + 1 < len(lines):
+            unzr_match = re.search(r"\d{4,}-\d{4,}", lines[i + 1])
+            if unzr_match:
+                result["record_no"] = unzr_match.group()
+                break
+
+    # Tax ID
+    for i, line in enumerate(lines):
+        if "РНОКПП" in line and i + 1 < len(lines):
+            ipn_match = re.search(r"\d{8,10}", lines[i + 1])
+            if ipn_match:
+                result["tax_id"] = ipn_match.group()
+                break
+
+    # Address
+    start_index = None
+    for i, line in enumerate(lines):
+        if "Адреса місця проживання" in line:
+            start_index = i
+            break
+
+    if start_index is not None:
+        address_candidates = []
+        for line in lines[start_index + 1:]:
+            if any(kw in line.lower() for kw in ["область", "район", "місто", "вул", "буд", "кв"]):
+                address_candidates.append(line)
+            elif address_candidates:
+                break
+        if address_candidates:
+            result["residency_address"] = ", ".join(address_candidates)
+
+    # Full name
+    last_name = first_name = patronymic = ""
+    for i, line in enumerate(lines):
+        if "Прізвище" in line and i + 1 < len(lines):
+            last_name = lines[i + 1]
+        if "Власне ім'я" in line and i + 1 < len(lines):
+            first_name = lines[i + 1]
+        if "По батькові" in line and i + 1 < len(lines):
+            patronymic = lines[i + 1]
+
+    if first_name and last_name:
+        result["full_name"] = f"{last_name} {first_name} {patronymic}".strip()
+
+    return result

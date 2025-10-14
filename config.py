@@ -29,9 +29,19 @@ class BotConfig:
 @dataclass
 class GoogleConfig:
     """Google Drive and Sheets configuration"""
-    documents_folder: str = "Documents"
-    database_sheet: str = "database"
-    worksheet_name: str = "Аркуш1"
+    # --- Загальна база даних (стара логіка) ---
+    main_documents_folder: str = "Documents"
+    main_database_sheet: str = "database"
+    main_worksheet_name: str = "Аркуш1"
+
+    # --- Нова логіка для партій ---
+    parties_root_folder_name: str = "Партії ЛеоКарт" # Назва кореневої папки для всіх партій
+    party_folder_name_template: str = "матеріали {} партія ({})" # Шаблон для папок партій, напр. "матеріали 89 партія (73)"
+    party_spreadsheet_name_template: str = "Партія {}" # Шаблон для назви таблиці всередині папки партії
+    student_folder_name_template: str = "{} - {}" # Шаблон для папки студента, напр. "Іваненко Іван - 20080101-09261"
+    template_spreadsheet_id: str = "YOUR_TEMPLATE_SPREADSHEET_ID_HERE" # ID вашого файлу-шаблону
+
+    # --- Загальні налаштування ---
     credentials_file: str = "credentials.json"
     token_file: str = "token.json"
 
@@ -48,7 +58,7 @@ class FileNames:
     payment_receipt: str = "payment_receipt"  # Extension added dynamically
     residency_extract: str = "residency_extract.pdf"
     photo_3x4: str = "photo_3x4.jpg"
-    combined_pdf: str = "scan_bundle.pdf"
+    combined_pdf: str = "scan_bundle.pdf" # Це ім'я більше не використовується для Drive, але може бути корисним
 
 
 @dataclass
@@ -58,7 +68,7 @@ class Messages:
         "Привіт! Я твій помічник у виготовленні студентської ЛеоКарт.\n\n"
         "Для початку, вкажи, будь ласка, на якому ти рівні навчання?"
     )
-
+    # ... (решта повідомлень без змін)
     ask_assistance: str = "Бажаєте оформити ЛеоКарт самостійно чи з моєю допомогою?"
 
     self_service: str = (
